@@ -50,20 +50,12 @@ def menuOther(menuText):
 def pointer():
     print("-> ")
 
-# def float2(x):
-
-#     x = "{:.2f}".format(x)
-#     return float(x)
-
 ###################
 # Login Functions #
 ###################
 
 
 def login():
-
-    # f = open("Users.txt", "rb")
-    # users = pickle.load(f)
 
     menuOther("""Welcome to Point of Sale V1.1!
 Please enter your login credentials to continue""")
