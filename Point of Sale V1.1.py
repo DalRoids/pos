@@ -311,7 +311,6 @@ def skuCreate():
             break
 
         sku_object = [product_name, product_price]
-
         sku_entry = {product_sku: sku_object}
 
         with open("Inventory.txt", "r") as file:
