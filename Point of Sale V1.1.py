@@ -10,10 +10,10 @@ def main():
     login_check = False
 
     while login_check == False:
-
         login_check = login()
 
-    mainMenu()
+    if login_check == True:
+        mainMenu()
 
 ############################
 # User Interface Functions #
@@ -67,6 +67,9 @@ def pointer():
 
 def login():
 
+    un_check = False
+    pw_check = False
+
     menuOther("""Welcome to Point of Sale V1.1!
 Please enter your login credentials to continue""")
 
@@ -74,17 +77,22 @@ Please enter your login credentials to continue""")
 
     while check is False:
 
+        with open("Users.txt", "r") as file:
+            data = json.load(file)
+
         try:
             un = input("""Username
 -> """)
+            if un not in data:
+                print("Incorrect username")
+                continue
+
             pw = int(input("""Password
 -> """))
+
         except:
             menuOther("Incorrect entry, please try again")
             continue
-
-        with open("Users.txt", "r") as file:
-            data = json.load(file)
 
         for x, y in data.items():
 
@@ -96,6 +104,7 @@ Please enter your login credentials to continue""")
         if un_check is True and pw_check is True:
             check = True
         else:
+            print("Incorrect Password")
             continue
 
     time.sleep(1)
@@ -508,4 +517,3 @@ def viewUsers():
 
 
 main()
-
