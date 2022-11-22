@@ -3,8 +3,17 @@ import json
 
 tax_rate = 1.12
 last_charge_untaxed = 0
-users = {}
-master_login = {1001: 1234}
+
+
+def main():
+
+    login_check = False
+
+    while login_check == False:
+
+        login_check = login()
+
+    mainMenu()
 
 ############################
 # User Interface Functions #
@@ -50,6 +59,7 @@ def menuOther(menuText):
 def pointer():
     print("-> ")
 
+
 ###################
 # Login Functions #
 ###################
@@ -65,29 +75,26 @@ Please enter your login credentials to continue""")
     while check is False:
 
         try:
-            un = int(input("""Username
--> """))
+            un = input("""Username
+-> """)
             pw = int(input("""Password
 -> """))
         except:
             menuOther("Incorrect entry, please try again")
             continue
 
-        for x, y in master_login.items():
-            if x == un:
-                un_check = True
-                if y == pw:
-                    pw_check = True
-                    check = True
+        with open("Users.txt", "r") as file:
+            data = json.load(file)
 
-        for x, y in users.items():
+        for x, y in data.items():
+
             if x == un:
                 un_check = True
-                if y == pw:
-                    pw_check = True
-                    check = True
-            else:
-                break
+            if y == pw:
+                pw_check = True
+
+        if un_check is True and pw_check is True:
+            check = True
 
     time.sleep(1)
     print("")
@@ -95,6 +102,7 @@ Please enter your login credentials to continue""")
     time.sleep(1)
 
     return True
+
 
 #######################
 # Main Menu Functions #
@@ -118,13 +126,17 @@ Main Menu
         if x == "1":
             saleEntry()
         elif x == "2":
+            time.sleep(0.2)
+            print("Loading Inventory Functions...")
+            time.sleep(0.3)
             inventoryMenu()
         elif x == "3":
-            createUser()
+            userMenu()
         elif x == "4":
             time.sleep(0.2)
             print("System shutting down...")
             time.sleep(3)
+            exit("System succesfully shut down")
 
 
 ########################
@@ -136,6 +148,7 @@ def saleEntry():
 
     global last_charge
     global last_charge_untaxed
+    receipt_details = ""
     p_name = 0
     p_price = 1
     total = 0
@@ -183,6 +196,16 @@ def saleEntry():
         # sums product and quantity to 2 decimal points
         total = float("{:.2f}".format(total + (product * quantity)))
         time.sleep(0.3)
+
+        receipt_entry = f"""{sku} | {product_name} | {product} | {quantity}"""
+        if receipt_details == "":
+            receipt_details = receipt_details + receipt_entry
+        else:
+            receipt_details = receipt_details + "\n" + receipt_entry
+
+    for each in receipt_details.split("\n"):
+        time.sleep(0.1)
+        print(each)
 
     last_charge_untaxed = total
     last_charge = total * tax_rate
@@ -240,6 +263,8 @@ def payment():
 
             if confirm.lower() == "y":
                 last_charge_untaxed = 0
+                print("Returning to main menu...")
+                time.sleep(1)
                 mainMenu()
             elif confirm.lower() == "n":
                 continue
@@ -257,7 +282,7 @@ def payment():
         time.sleep(1)
         print("Sale did not go through, customer not charged, returning to main menu...")
         time.sleep(0.5)
-        mainMenu
+        mainMenu()
 
 
 #######################
@@ -273,15 +298,22 @@ def inventoryMenu():
 2. SKU creation
 3. View Stock File""")
 
-    user_input = input("What would you like to do: ")
+    user_input = input("-> ")
+
+    if user_input.lower() == "d" or user_input.lower() == "e":
+        time.sleep(0.5)
+        mainMenu()
 
     if user_input == "1":
+        time.sleep(0.2)
         stockLookup()
 
     if user_input == "2":
+        time.sleep(0.2)
         skuCreate()
 
     if user_input == "3":
+        time.sleep(0.2)
         viewAll()
 
 
@@ -303,6 +335,7 @@ def skuCreate():
             break
 
         sku_object = [product_name, product_price]
+
         sku_entry = {product_sku: sku_object}
 
         with open("Inventory.txt", "r") as file:
@@ -367,12 +400,13 @@ def viewAll():
             print(each, "|", s_list[0], "|", s_list[1])
 
         time.sleep(1)
-        print("Press D to return to Inventory Menu")
+        print("""Press D to return to Inventory Menu""")
         user_input = input("-> ")
 
         if user_input.lower() == "d":
             break
 
+    time.sleep(0.5)
     inventoryMenu()
 
 
@@ -380,4 +414,96 @@ def viewAll():
 # User Functions #
 ##################
 
-mainMenu()
+
+def userMenu():
+
+    menuCreate("User Functions", "Back")
+
+    print("""1. Add User
+2. Delete User
+3. View Users""")
+
+    user_choice = input("-> ")
+
+    if user_choice.lower() == "d" or user_choice.lower() == "e":
+        time.sleep(0.5)
+        print(">>> Loading main menu")
+        time.sleep(0.5)
+        mainMenu()
+    if user_choice == "1":
+        time.sleep(0.5)
+        userAdd()
+    if user_choice == "2":
+        time.sleep(0.5)
+        userDelete()
+    if user_choice == "3":
+        time.sleep(0.5)
+        viewUsers()
+
+
+def userAdd():
+
+    while True:
+
+        try:
+            username = int(input("Please enter a 4 digit numerical user ID: "))
+            password = int(
+                input("Please enter a 6 digit numerical password: "))
+        except:
+            continue
+
+        user = {username: password}
+
+        with open("Users.txt", "r") as file:
+            data = json.load(file)
+
+        data.update(user)
+
+        with open("Users.txt", "w") as file:
+            data = json.dump(data, file)
+
+        time.sleep(0.5)
+        print("Adding User...")
+        time.sleep(0.5)
+        print("User added, returning to User Menu")
+        break
+
+    userMenu()
+
+
+def userDelete():
+
+    while True:
+
+        try:
+            username = input("Enter user to delete: ")
+        except:
+            continue
+
+        with open("Users.txt", "r") as file:
+            data = json.load(file)
+
+        if username in data:
+            data.pop(username)
+        else:
+            print("User not found, returning to main menu...")
+
+        with open("Users.txt", "w") as file:
+            data = json.dump(data, file)
+
+        break
+
+    print("User succesfully deleted, returning to main menu")
+
+
+def viewUsers():
+
+    with open("Users.txt", "r") as file:
+        data = json.load(file)
+
+    for each, value in data.items():
+        print(each, value)
+
+
+main()
+
