@@ -95,6 +95,8 @@ Please enter your login credentials to continue""")
 
         if un_check is True and pw_check is True:
             check = True
+        else:
+            continue
 
     time.sleep(1)
     print("")
