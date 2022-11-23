@@ -184,12 +184,11 @@ def saleEntry():
             mainMenu()
         if sku.lower() == "d":
             time.sleep(0.2)
-            if total < 0.01:
-                print(
-                    ">>> No items entered, please enter items or enter E to return to main menu")
-                continue
-            else:
-                break
+        if total < 0.01:
+            print(">>> No items entered, please enter items or enter E to return to main menu")
+            continue
+        else:
+            break
 
         if sku in sku_data:
 
