@@ -1,7 +1,6 @@
 import time
 import json
 
-tax_rate = 1.12
 last_charge_untaxed = 0
 
 
@@ -127,7 +126,7 @@ def mainMenu():
         x = input("""
 Main Menu
 --------------
-1. Sale Entry
+1. Sale Menu
 2. Inventory
 3. Users
 4. Exit System
@@ -135,7 +134,7 @@ Main Menu
 -> """)
 
         if x == "1":
-            saleEntry()
+            saleMenu()
         elif x == "2":
             time.sleep(0.2)
             print("Loading Inventory Functions...")
@@ -153,6 +152,24 @@ Main Menu
 ########################
 # Sales Menu Functions #
 ########################
+
+def saleMenu():
+    global tax_rate
+
+    menuCreate("Sales Functions", "Back")
+
+    menuOther("""1. Sale Entry
+2. Invoice History
+3. Tax Rate""")
+
+    inp = input("-> ")
+
+    if inp == "1":
+        saleEntry()
+    elif inp == "2":
+        invoiceHistory()
+    elif inp == "3":
+        tax_rate = taxRate()
 
 
 def saleEntry():
@@ -184,11 +201,12 @@ def saleEntry():
             mainMenu()
         if sku.lower() == "d":
             time.sleep(0.2)
-        if total < 0.01:
-            print(">>> No items entered, please enter items or enter E to return to main menu")
-            continue
-        else:
-            break
+            if total < 0.01:
+                print(
+                    ">>> No items entered, please enter items or enter E to return to main menu")
+                continue
+            else:
+                break
 
         if sku in sku_data:
 
@@ -294,6 +312,66 @@ def payment():
         time.sleep(0.5)
         mainMenu()
 
+
+def taxRate():
+
+    inp = 0
+
+    def getFloat(x):
+
+        inp = "1." + x
+        inp = float(inp)
+        print(inp)
+
+        return inp
+
+    with open("TaxRate.json", "r") as file:
+        data = json.load(file)
+
+    if "tax" in data:
+        tax_string = str(data["tax"])
+        print(f"Current tax rate is {tax_string[2:]}%")
+        time.sleep(0.5)
+
+        while len(str(inp)) != 2:
+
+            try:
+                inp = input("Please enter new tax rate: ")
+            except:
+                continue
+
+            print("Tax rate cannot exceed 99%")
+
+        getFloat(inp)
+
+    while True:
+
+        if inp == data["tax"]:
+            print(
+                f"""Tax rate already set to {data["tax"]}%, would you like to keep it at this? Y/N""")
+            inp_2 = input("-> ")
+            if inp_2.lower() == "y":
+                break
+            if inp_2.lower() == "n":
+                inp = input("Please enter new tax rate: ")
+                inp = getFloat(inp)
+                continue
+        else:
+            break
+
+    time.sleep(0.5)
+    print(f">>>Tax rate changed to {inp}")
+
+    data = {"tax": inp}
+
+    with open("TaxRate.json", "w") as file:
+        data = json.dump(data, file)
+
+    time.sleep(0.5)
+    print("Saving and returning to sale menu...")
+    time.sleep(0.5)
+
+    saleMenu()
 
 #######################
 # Inventory Functions #
@@ -515,4 +593,4 @@ def viewUsers():
         print(each, value)
 
 
-main()
+taxRate()
