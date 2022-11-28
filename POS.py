@@ -4,6 +4,7 @@ import json
 last_charge_untaxed = 0
 
 
+
 def main():
 
     login_check = False
@@ -69,7 +70,7 @@ def login():
     un_check = False
     pw_check = False
 
-    menuOther("""Welcome to Point of Sale V1.1!
+    menuOther("""Welcome to Point of Sale V1.2!
 Please enter your login credentials to continue""")
 
     check = False
@@ -134,6 +135,10 @@ Main Menu
 -> """)
 
         if x == "1":
+            print("")
+            time.sleep(0.2)
+            print("Loading Sales Functions...\n")
+            time.sleep(0.3)
             saleMenu()
         elif x == "2":
             time.sleep(0.2)
@@ -165,6 +170,7 @@ def saleMenu():
     inp = input("-> ")
 
     if inp == "1":
+        print("")
         saleEntry()
     elif inp == "2":
         invoiceHistory()
@@ -182,15 +188,25 @@ def saleEntry():
     total = 0
     if last_charge_untaxed > 0:
         total = last_charge_untaxed
+
+
+    with open("TaxRate.json", "r") as file:
+        tax_rate = json.load(file)
+
+    
+    if "tax" in tax_rate:
+        final_tax = float(tax_rate["tax"])
+
     time.sleep(0.2)
     print("Loading Sale Entry...")
+    print("")
     time.sleep(0.3)
 
     menuCreate("SKU Entry", "Payment")
 
     while True:
 
-        with open("Inventory.txt", "r") as file:
+        with open("Inventory.json", "r") as file:
             sku_data = json.load(file)
 
         sku = input("Enter SKU: ")
@@ -219,11 +235,14 @@ def saleEntry():
             continue
 
         product = float(product)
-        print(f">>> {product_name}")
+        print(f">>> {product_name} | {product}")
         quantity = int(input("Quantity: "))
         # sums product and quantity to 2 decimal points
         total = float("{:.2f}".format(total + (product * quantity)))
+        last = float("{:.2f}".format(product * quantity))
+        print(f">>> {last} | {total}")
         time.sleep(0.3)
+
 
         receipt_entry = f"""{sku} | {product_name} | {product} | {quantity}"""
         if receipt_details == "":
@@ -231,12 +250,14 @@ def saleEntry():
         else:
             receipt_details = receipt_details + "\n" + receipt_entry
 
+    print("")
+    
     for each in receipt_details.split("\n"):
         time.sleep(0.1)
         print(each)
 
     last_charge_untaxed = total
-    last_charge = total * tax_rate
+    last_charge = total * final_tax
     format_charge = "{:.2f}".format(last_charge)
     last_charge = float(format_charge)
     time.sleep(0.3)
@@ -321,7 +342,6 @@ def taxRate():
 
         inp = "1." + x
         inp = float(inp)
-        print(inp)
 
         return inp
 
@@ -338,9 +358,8 @@ def taxRate():
             try:
                 inp = input("Please enter new tax rate: ")
             except:
+                print("Tax rate cannot exceed 99%")
                 continue
-
-            print("Tax rate cannot exceed 99%")
 
         getFloat(inp)
 
@@ -426,12 +445,12 @@ def skuCreate():
 
         sku_entry = {product_sku: sku_object}
 
-        with open("Inventory.txt", "r") as file:
+        with open("Inventory.json", "r") as file:
             data = json.load(file)
 
         data.update(sku_entry)
 
-        with open("Inventory.txt", "w") as file:
+        with open("Inventory.json", "w") as file:
             data = json.dump(data, file)
 
         choice = input("""Add another SKU to inventory?
@@ -462,7 +481,7 @@ def stockLookup():
             time.sleep(0.5)
             inventoryMenu()
 
-        with open("Inventory.txt", "r") as file:
+        with open("Inventory.json", "r") as file:
             data = json.load(file)
 
         time.sleep(0.5)
@@ -479,7 +498,7 @@ def viewAll():
 
     while True:
 
-        with open("Inventory.txt", "r") as file:
+        with open("Inventory.json", "r") as file:
             stock_list = json.load(file)
 
         for each in stock_list:
