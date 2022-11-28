@@ -4,7 +4,6 @@ import json
 last_charge_untaxed = 0
 
 
-
 def main():
 
     login_check = False
@@ -251,7 +250,7 @@ def saleEntry():
             receipt_details = receipt_details + "\n" + receipt_entry
 
     print("")
-    
+
     for each in receipt_details.split("\n"):
         time.sleep(0.1)
         print(each)
